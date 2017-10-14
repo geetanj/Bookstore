@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Bookstore</string>
+    <string-array name="searchitems">
+
+        <item>Search Books</item>
+        <item>Book Name</item>
+        <item>Author Name</item>
+    </string-array>
+</resources>
