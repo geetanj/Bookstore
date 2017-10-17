@@ -106,8 +106,6 @@ public class Main2Activity extends AppCompatActivity {
         switch(item.getItemId()) {
 
             case R.id.menu_search :
-
-                Toast.makeText(getApplicationContext(), "search books ", Toast.LENGTH_LONG).show();
                 searchdisplay();
             default :
 
@@ -132,95 +130,119 @@ public class Main2Activity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                Toast.makeText(getApplicationContext(), "searching " + edt.getText(), Toast.LENGTH_LONG).show();
+
                 String keyme = edt.getText().toString().toLowerCase();
 
 
-                if(spin.getSelectedItem().toString().equals("Book Name")){
-                    searchbyname(keyme);
+                if(keyme.isEmpty())
+                {
+                    Toast.makeText(getApplicationContext(),"Please Enter Keyword!",Toast.LENGTH_LONG).show();
+
+                }else
+                {
+                    if(spin.getSelectedItem().toString().equals("Book Name")){
+                        searchbyName(keyme);
+                        ds.dismiss();
+                    }
+                    else if(spin.getSelectedItem().toString().equals("Author Name")){
+                        searchbyAuthor(keyme);
+                        ds.dismiss();
+                    }
+                    else if(spin.getSelectedItem().toString().equals("Search Books"))
+                    {
+                        Toast.makeText(getApplicationContext(),"please select the choice",Toast.LENGTH_LONG).show();
+                    }
                 }
-                else if(spin.getSelectedItem().toString().equals("Author Name")){
-                    searchbyauthor(keyme);
-                }
-                else {
-                    Toast.makeText(getApplicationContext(),"please select the choice",Toast.LENGTH_LONG).show();
-                }
-                ds.dismiss();
+
+
+
+
             }
         });
 
         ds.show();
     }
 
-    public void searchbyname(final String keyme) {
+    public void searchbyName(final String key)
+    {
+
         FirebaseDatabase fd = FirebaseDatabase.getInstance();
         DatabaseReference db = fd.getReference("books");
+
         arrayList.clear();
+
         db.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                for (DataSnapshot ds : dataSnapshot.getChildren())
+                {
+                    String tit = ds.child("title").getValue().toString().toLowerCase();
 
-                for (DataSnapshot ds : dataSnapshot.getChildren()) {
-                    String title = ds.child("title").getValue().toString().toLowerCase();
+                    if(tit.contains(key))
+                    {
 
-                    if (title.contains(keyme)) {
+
                         String test = ds.child("title").getValue().toString();
-
-                        System.out.println("search me " + test);
+                        System.out.println("After key Search  "+ds.child("title").getValue().toString());
 
 
                         arrayList.add(new books(test));
+
                     }
-                    setAdapater();
                 }
+                setAdapater();
 
             }
+
+
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
             }
         });
+
+
     }
 
-    public void setAdapater() {
 
-        listviewadapter = new listviewadapter(Main2Activity.this, arrayList);
-        listview.setAdapter(listviewadapter);
-        listviewadapter.notifyDataSetChanged();
-    }
-
-    public void searchbyauthor(final String autnm){
+    public void searchbyAuthor(final String autnm)
+    {
         FirebaseDatabase fd = FirebaseDatabase.getInstance();
-        final DatabaseReference db = fd.getReference("auhtors");
+        DatabaseReference db = fd.getReference("authors");
+
         arrayList.clear();
 
         db.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
-                for (DataSnapshot ds : dataSnapshot.getChildren()) {
-
-
+                for(DataSnapshot ds : dataSnapshot.getChildren())
+                {
                     String nm = ds.child("name").getValue().toString().toLowerCase();
-                    if (nm.contains(autnm)) {
+                    if(nm.contains(autnm))
+                    {
+                        final String autid = ds.getKey();
 
-                        final String authid=ds.getKey();
-                        System.out.println("author id " + ds.getKey());
                         FirebaseDatabase fd2 = FirebaseDatabase.getInstance();
                         DatabaseReference db2 = fd2.getReference("books");
+
                         db2.addValueEventListener(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
-                                for (DataSnapshot ds : dataSnapshot.getChildren()) {
+
+                                for (DataSnapshot ds : dataSnapshot.getChildren())
+                                {
                                     String id = ds.child("author_id").getValue().toString();
-                                    if (id.equals(authid)) {
 
+                                    if (id.equals(autid))
+                                    {
                                         arrayList.add(new books(ds.child("title").getValue().toString()));
-
                                     }
-                                    setAdapater();
                                 }
+
+                                setAdapater();
+
                             }
 
                             @Override
@@ -229,11 +251,10 @@ public class Main2Activity extends AppCompatActivity {
                             }
                         });
                     }
-                    }
+
                 }
 
-
-
+            }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
@@ -241,6 +262,18 @@ public class Main2Activity extends AppCompatActivity {
             }
         });
 
+    }
+
+    public void setAdapater() {
+
+        if(arrayList.size()==0)
+        {
+            Toast.makeText(getApplicationContext(),"No Books Found!",Toast.LENGTH_LONG).show();
+        }
+
+        listviewadapter = new listviewadapter(Main2Activity.this, arrayList);
+        listview.setAdapter(listviewadapter);
+        listviewadapter.notifyDataSetChanged();
     }
     public boolean tocanada(String cn){
         if(cn.equals("CA")){

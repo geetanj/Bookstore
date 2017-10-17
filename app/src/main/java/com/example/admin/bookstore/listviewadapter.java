@@ -71,16 +71,20 @@ public class listviewadapter extends BaseAdapter {
 
         textView.setOnClickListener(new View.OnClickListener() {
             public void onClick(View view) {
-                Toast.makeText(c, arrylst.get(i).getBookname().toString(), Toast.LENGTH_LONG).show();
+                //Toast.makeText(c, arrylst.get(i).getBookname().toString(), Toast.LENGTH_LONG).show();
+                String bkn=arrylst.get(i).getBookname().toString();
 
-                db.child("books").orderByChild("title").equalTo(arrylst.get(i).getBookname().toString()).addChildEventListener(new ChildEventListener() {
+
+                db.child("books").orderByChild("title").equalTo(bkn).addChildEventListener(new ChildEventListener() {
                     @Override
                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
 
-                        fd = FirebaseDatabase.getInstance();
-                        db = fd.getReference();
-                        String ls=db.child("books").child(dataSnapshot.getKey()).toString();
-                        Toast.makeText(c,ls,Toast.LENGTH_LONG);
+
+                        FirebaseDatabase db2 = FirebaseDatabase.getInstance();
+                        DatabaseReference myref2 = db2.getReference();
+
+                        String ls=myref2.child("books").child(dataSnapshot.getKey()).toString();
+                       Toast.makeText(c,ls,Toast.LENGTH_LONG);
                         Intent i=new Intent(c,booksdetail.class);
                         i.putExtra("key",ls);
                         c.startActivity(i);
